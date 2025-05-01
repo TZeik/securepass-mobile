@@ -1,27 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { Camera, CameraType, CameraView, useCameraPermissions} from 'expo-camera';
+import React, { useEffect ,useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
-import { Camera, CameraType, BarCodeScanningResult } from 'expo-camera';
+import {BarCodeScannerResult } from 'expo-barcode-scanner';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { RootStackParamList } from '../types';
+
+
+type ScannerRouteProp = RouteProp<RootStackParamList, 'Scanner'>;
+
 
 export default function QRScannerScreen() {
+  const route = useRoute<ScannerRouteProp>();
+  const { onScanned } = route.params;
+
+  //const [permission, requestPermission] = useCameraPermissions();
+  const [cameraType, setCameraType] = useState<CameraType>("back");
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
-  const cameraRef = useRef<Camera | null>(null);
+  //const cameraRef = useRef<typeof Camera  | null>(null);
   const [scannedData, setScannedData] = useState<string | null>(null);
 
+  
   useEffect(() => {
     (async () => {
+
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
-
-  const handleBarCodeScanned = ({ data }: BarCodeScanningResult) => {
+ 
+   const handleBarCodeScanned = ({ data }: BarCodeScannerResult) => {
     if (!scanned) {
       setScanned(true);
       setScannedData(data);
+      onScanned(data);
       Alert.alert('Código escaneado', data);
     }
-  };
+  }; 
 
   if (hasPermission === null) {
     return <Text>Solicitando permiso de cámara...</Text>;
@@ -33,15 +48,16 @@ export default function QRScannerScreen() {
 
   return (
     <View style={styles.container}>
-      <Camera
-        ref={(ref) => (cameraRef.current = ref)}
-        style={StyleSheet.absoluteFillObject}
-        type={CameraType.back}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        barCodeScannerSettings={{
-          barCodeTypes: ['qr'],
+     
+       <CameraView
+        //ref={(ref) => (cameraRef.current = ref)}
+        facing={cameraType}
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr"],
         }}
-      />
+        style={StyleSheet.absoluteFillObject}
+      /> 
       <View style={styles.overlay}>
         {scannedData && <Button title="Escanear otro" onPress={() => {
           setScanned(false);

@@ -1,21 +1,21 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../types";
 
 // Usa el mismo tipo de parámetros definido en Navigation.tsx
-type RootStackParamList = {
-  Login: undefined;
-  Main: undefined;
-  QRScanner: undefined;
-};
 
 type MainScreenProps = NativeStackScreenProps<RootStackParamList, "Main">;
 
 const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
   const handleRegistrarAcceso = () => {
-    navigation.navigate('QRScanner');
+    navigation.navigate("Scanner", {
+      onScanned: (value: string) => {
+        console.log("Escaneado:", value);
+      },
+    });
   };
-  
+
   return (
     <View style={styles.container}>
       <TouchableOpacity

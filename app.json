@@ -26,7 +26,7 @@
     },
     "plugins": [
       "expo-barcode-scanner",
-      "react-native-permissions"
+      ["react-native-permissions", {}]
     ]
   }
 }
