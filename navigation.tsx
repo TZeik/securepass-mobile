@@ -5,17 +5,19 @@ import MainScreen from './components/MainScreen';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import QRCodeScanner from './components/QRCodeScanner';
 
 // Define los tipos para tus rutas
 type RootStackParamList = {
   Login: undefined;
   Main: undefined;
+  QRScanner: undefined;
 };
 
-// Tipo para las props de navegación
+
+
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-// Componente LoginScreen con tipos correctos
 function LoginScreen({ navigation }: LoginScreenProps) {
   const handleLogin = (username: string, password: string) => {
     console.log("Login attempt with:", { username, password });
@@ -34,6 +36,18 @@ function LoginScreen({ navigation }: LoginScreenProps) {
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+<Stack.Screen name="QRScanner" component={QRCodeScanner} options={{ title: 'Escanear QR' }} />
+
+function QRCodeScannerScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'QRScanner'>) {
+  const handleScanned = (data: string) => {
+    console.log("Contenido escaneado:", data);
+    navigation.goBack(); // Opcional: vuelve atrás después de escanear
+  };
+
+  return <QRCodeScanner onScanned={handleScanned} />;
+}
+
 
 export default function Navigation() {
   return (

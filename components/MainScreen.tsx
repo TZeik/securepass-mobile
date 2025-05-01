@@ -6,16 +6,21 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 type RootStackParamList = {
   Login: undefined;
   Main: undefined;
+  QRScanner: undefined;
 };
 
 type MainScreenProps = NativeStackScreenProps<RootStackParamList, "Main">;
 
 const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
+  const handleRegistrarAcceso = () => {
+    navigation.navigate('QRScanner');
+  };
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={[styles.button, styles.primaryButton]}
-        onPress={() => console.log("Registrar acceso")}
+        onPress={handleRegistrarAcceso}
       >
         <Text style={styles.buttonText}>Registrar Acceso</Text>
       </TouchableOpacity>
