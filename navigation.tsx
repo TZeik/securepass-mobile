@@ -8,6 +8,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import QRCodeScanner from "./components/QRCodeScanner";
 import { RootStackParamList } from "./types";
 import QRScannerScreen from "./components/QRCodeScanner";
+import AccessDetailsScreen from "./components/AccessDetailsScreen";
+import PersonDetailScreen from "./components/PersonDetailScreen";
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -51,7 +53,7 @@ export default function Navigation() {
           component={QRScannerScreen}
           options={{ title: "Escanear QR" }}
         />
-        
+
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -61,6 +63,18 @@ export default function Navigation() {
           name="Main"
           component={MainScreen}
           options={{ title: "Control de acceso" }}
+        />
+
+        <Stack.Screen
+          name="AccessDetails"
+          component={AccessDetailsScreen}
+          options={{ title: "Detalles de Acceso" }}
+        />
+
+        <Stack.Screen
+          name="PersonDetail"
+          component={PersonDetailScreen}
+          options={{ title: "Detalles de Persona" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

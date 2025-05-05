@@ -16,6 +16,10 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     });
   };
 
+  const handleDetallesAcceso = () => {
+    navigation.navigate("AccessDetails");
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -27,7 +31,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
 
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
-        onPress={() => console.log("Detalles de acceso")}
+        onPress={handleDetallesAcceso}
       >
         <Text style={styles.buttonText}>Detalles de Acceso</Text>
       </TouchableOpacity>
