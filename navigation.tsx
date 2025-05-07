@@ -10,6 +10,7 @@ import { RootStackParamList } from "./types";
 import QRScannerScreen from "./components/QRCodeScanner";
 import AccessDetailsScreen from "./components/AccessDetailsScreen";
 import PersonDetailScreen from "./components/PersonDetailScreen";
+import ExitRegistrationScreen from "./components/ExitRegistrationScreen";
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -75,6 +76,12 @@ export default function Navigation() {
           name="PersonDetail"
           component={PersonDetailScreen}
           options={{ title: "Detalles de Persona" }}
+        />
+
+        <Stack.Screen
+          name="ExitRegistration"
+          component={ExitRegistrationScreen}
+          options={{ title: "Registrar Salida" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

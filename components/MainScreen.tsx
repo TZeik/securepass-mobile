@@ -20,6 +20,10 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
     navigation.navigate("AccessDetails");
   };
 
+  const handleRegistrarSalida = () => {
+    navigation.navigate("ExitRegistration");
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -38,7 +42,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation }) => {
 
       <TouchableOpacity
         style={[styles.button, styles.tertiaryButton]}
-        onPress={() => console.log("Registrar salida")} // Ejemplo usando navigation
+        onPress={handleRegistrarSalida} // Ejemplo usando navigation
       >
         <Text style={styles.buttonText}>Registrar salida</Text>
       </TouchableOpacity>

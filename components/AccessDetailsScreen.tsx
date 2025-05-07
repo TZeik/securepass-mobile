@@ -2,40 +2,13 @@ import React from "react";
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
+import { useAccess } from "./AccessContext";
+
 
 type AccessDetailsScreenProps = NativeStackScreenProps<RootStackParamList, "AccessDetails">;
 
 const AccessDetailsScreen: React.FC<AccessDetailsScreenProps> = ({ navigation }) => {
-  //Datos de cada uno
-  const accessRecords = [
-    { 
-      id: 1, 
-      name: "Juan Pérez", 
-      time: "09:15 AM",
-      fullName: "Juan Alberto Pérez González",
-      idNumber: "402-31824212-3",
-      vehicle: "Toyota Corolla 2020 - ABC123",
-      entryDate: "15/05/2023",
-      entryTime: "09:00 AM",
-      visitPurpose: "Reunión de negocios",
-      contactPerson: "Carlos Méndez",
-      department: "Ventas"
-    },
-    { 
-      id: 2, 
-      name: "María García", 
-      time: "10:30 AM",
-      fullName: "María José García Rodríguez",
-      idNumber: "402-31824212-2",
-      vehicle: "Nissan Sentra 2019 - XYZ987",
-      entryDate: "15/05/2023",
-      entryTime: "10:00 AM",
-      visitPurpose: "Entrega de documentos",
-      contactPerson: "Ana López",
-      department: "Contabilidad"
-    },
-    // ... más registros
-  ];
+  const { accessRecords } = useAccess();
 
   const handlePersonPress = (person: any) => {
     navigation.navigate("PersonDetail", { person });
