@@ -12,9 +12,9 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types/types";
-import { loginUser, setAuthToken } from "../api/auth.api";
-import { LoginResponse } from "../types/auth.types";
+import { RootStackParamList } from "../../types/types";
+import { getAuthenticatedUser, loginUser, setAuthToken } from "../../api/auth.api";
+import { LoginResponse } from "../../types/auth.types";
 interface LoginComponentProps {
   logoImage: any;
 }
@@ -37,7 +37,9 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
       password: "",
     };
 
-    { /* Validador de Email*/ }
+    {
+      /* Validador de Email*/
+    }
     if (!email.trim()) {
       newErrors.email = "El email es requerido";
       valid = false;
@@ -46,7 +48,9 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
       valid = false;
     }
 
-    { /* Validador de contraseña */ }
+    {
+      /* Validador de contraseña */
+    }
     if (!password.trim()) {
       newErrors.password = "La contraseña es requerida";
       valid = false;
@@ -64,18 +68,15 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
 
     setIsLoading(true);
     try {
-      // Como antes tomamos la información del token y del usuario
-      const { token, user } = (await loginUser({
-        email,
-        password,
-      }));
+      const { token } = await loginUser({ email, password });
+      setAuthToken(token);
 
-      setAuthToken(token); // Token configurado globalmente
+      // Verificación adicional del usuario
+      const verifiedUser = await getAuthenticatedUser();
 
-      // Uso mi useNavigation para ir a MainScreen pasando el token y la información del usuario.
       navigation.replace("Main", {
         token,
-        user,
+        user: verifiedUser, // Usamos el usuario verificado
       });
     } catch (error: any) {
       Alert.alert("Error", error.message || "Error al iniciar sesión");

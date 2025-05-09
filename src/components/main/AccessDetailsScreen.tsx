@@ -1,17 +1,20 @@
 import React from "react";
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../types/types";
 import { useAccess } from "./AccessContext";
-
 
 type AccessDetailsScreenProps = NativeStackScreenProps<RootStackParamList, "AccessDetails">;
 
-const AccessDetailsScreen: React.FC<AccessDetailsScreenProps> = ({ navigation }) => {
+const AccessDetailsScreen: React.FC<AccessDetailsScreenProps> = ({ navigation, route }) => {
   const { accessRecords } = useAccess();
+  const { token } = route.params; // Obtenemos el token de los parámetros de ruta
 
   const handlePersonPress = (person: any) => {
-    navigation.navigate("PersonDetail", { person });
+    navigation.navigate("PersonDetail", { 
+      token, // Pasamos el token de la ruta actual
+      person 
+    });
   };
 
   return (
@@ -33,6 +36,7 @@ const AccessDetailsScreen: React.FC<AccessDetailsScreenProps> = ({ navigation })
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

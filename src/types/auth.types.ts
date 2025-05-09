@@ -3,9 +3,7 @@ export interface LoginData {
   password: string;
 }
 
-export interface LoginResponse {
-  token: string;
-  user: {
+export interface User {
     _id: string;
     name: string;
     email: string;
@@ -14,6 +12,10 @@ export interface LoginResponse {
     tel?: string;
     shift?: string;
     registerDate: string;
-  };
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User
   expiresIn: number;
 }

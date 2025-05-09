@@ -1,15 +1,15 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import LoginComponent from "./components/LoginComponent";
-import MainScreen from "./components/MainScreen";
+import LoginComponent from "../components/auth/LoginComponent";
+import MainScreen from "../components/main/MainScreen";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { RootStackParamList } from "./types/types";
-import QRScannerScreen from "./components/QRCodeScanner";
-import AccessDetailsScreen from "./components/AccessDetailsScreen";
-import PersonDetailScreen from "./components/PersonDetailScreen";
-import ExitRegistrationScreen from "./components/ExitRegistrationScreen";
-import { setAuthToken } from "./api/auth.api";
+import { RootStackParamList } from "../types/types";
+import QRScannerScreen from "../components/main/QRCodeScanner";
+import AccessDetailsScreen from "../components/main/AccessDetailsScreen";
+import PersonDetailScreen from "../components/main/PersonDetailScreen";
+import ExitRegistrationScreen from "../components/main/ExitRegistrationScreen";
+import { setAuthToken } from "../api/auth.api";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -38,7 +38,7 @@ export default function Navigation() {
             <>
               <StatusBar style="auto" />
               <LoginComponent
-                logoImage={require("./assets/Guardia.png")}
+                logoImage={require("../assets/guardia.png")}
                 {...props}
               />
             </>

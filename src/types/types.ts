@@ -24,6 +24,7 @@ export type RootStackParamList = {
   };
   PersonDetail: {
     token: string;
+    person: any;
   };
   ExitRegistration: {
     token: string;

@@ -3,37 +3,36 @@ import React, { useEffect ,useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import {BarCodeScannerResult } from 'expo-barcode-scanner';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { RootStackParamList } from '../types/types';
-
+import { RootStackParamList } from '../../types/types';
 
 type ScannerRouteProp = RouteProp<RootStackParamList, 'Scanner'>;
 
-
 export default function QRScannerScreen() {
   const route = useRoute<ScannerRouteProp>();
-  const { onScanned } = route.params;
+  const { onScanned, token } = route.params;
 
-  //const [permission, requestPermission] = useCameraPermissions();
   const [cameraType, setCameraType] = useState<CameraType>("back");
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
-  //const cameraRef = useRef<typeof Camera  | null>(null);
   const [scannedData, setScannedData] = useState<string | null>(null);
-
   
   useEffect(() => {
     (async () => {
-
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
  
-   const handleBarCodeScanned = ({ data }: BarCodeScannerResult) => {
+  const handleBarCodeScanned = ({ data }: BarCodeScannerResult) => {
     if (!scanned) {
       setScanned(true);
       setScannedData(data);
-      onScanned(data);
+      
+      // Verificamos si onScanned existe antes de llamarlo
+      if (onScanned) {
+        onScanned(data);
+      }
+      
       Alert.alert('Código escaneado', data);
     }
   }; 
@@ -48,9 +47,7 @@ export default function QRScannerScreen() {
 
   return (
     <View style={styles.container}>
-     
-       <CameraView
-        //ref={(ref) => (cameraRef.current = ref)}
+      <CameraView
         facing={cameraType}
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{

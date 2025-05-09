@@ -1,23 +1,40 @@
-import React from "react";
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, TouchableOpacity, Text, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../types/types";
+import { getAuthenticatedUser, setAuthToken } from "../../api/auth.api";
 
 type MainScreenProps = NativeStackScreenProps<RootStackParamList, "Main">;
 
 const MainScreen: React.FC<MainScreenProps> = ({ navigation, route }) => {
+  const { token } = route.params;
+  const [user, setUser] = useState(route.params.user);
+  const [loading, setLoading] = useState(false);
 
-  /* Obtener el token y los datos del usuario de los parámetros de ruta
-      y pasarlo a las siguientes pantallas:
-  */
-  const { token, user } = route.params;
+  useEffect(() => {
+    const verifySession = async () => {
+      try {
+        setLoading(true);
+        setAuthToken(token);
+        const currentUser = await getAuthenticatedUser();
+        setUser(currentUser);
+      } catch (error: any) {
+        Alert.alert("Error", error.message);
+        navigation.replace("Login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifySession();
+  }, [token]);
 
   const handleRegistrarAcceso = () => {
     navigation.navigate("Scanner", {
       onScanned: (value: string) => {
         console.log("Escaneado:", value);
       },
-      token
+      token,
     });
   };
 
@@ -30,11 +47,10 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation, route }) => {
   };
 
   return (
-    
     // Al entrar presentar al usuario autenticado
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Bienvenido, {user.name}</Text>
-      
+
       <TouchableOpacity
         style={[styles.button, styles.primaryButton]}
         onPress={handleRegistrarAcceso}
@@ -55,8 +71,6 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation, route }) => {
       >
         <Text style={styles.buttonText}>Residentes</Text>
       </TouchableOpacity>
-
-      
     </View>
   );
 };
