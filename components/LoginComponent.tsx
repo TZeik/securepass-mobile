@@ -27,6 +27,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
     email: "",
     password: "",
   });
+  // useState para representar carga de datos en botón
   const [isLoading, setIsLoading] = useState(false);
 
   const validateFields = () => {
@@ -129,6 +130,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
           onPress={handleLogin}
           disabled={isLoading}
         >
+          {/* Se cambia el valor del botón si el useState is Login es true o false */}
           <Text style={styles.loginButtonText}>
             {isLoading ? "CARGANDO..." : "LOGIN"}
           </Text>
