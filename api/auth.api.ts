@@ -7,26 +7,41 @@ export interface LoginData {
   password: string;
 }
 
-export interface LoginResponse{
-    token: string;
-    user: {
-        _id: string;
-        name: string;
-        email: string;
-        role: string;
-        apartment?: string;
-        tel?: string;
-        shift?: string;
-        registerDate: string;
-    };
-    expiresIn: number;
+export interface LoginResponse {
+  token: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+    apartment?: string;
+    tel?: string;
+    shift?: string;
+    registerDate: string;
+  };
+  expiresIn: number;
 }
 
-export const loginUser = async (data: LoginData): Promise<LoginResponse | void> => {
+export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, data);
+    const response = await axios.post<LoginResponse>(`${API_URL}/auth/login`, data);
     return response.data;
   } catch (error: any) {
-    console.error("Error al iniciar sesion", error);
+    if (error.response) {
+      throw new Error(error.response.data.error || "Error al iniciar sesión");
+    } else if (error.request) {
+      throw new Error("No se recibió respuesta del servidor");
+    } else {
+      throw new Error("Error al configurar la solicitud");
+    }
+  }
+};
+
+// Method para incluir el token en la request
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
   }
 };
