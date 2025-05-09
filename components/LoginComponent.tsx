@@ -10,34 +10,45 @@ import {
   Platform,
   Alert 
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
+import { LoginResponse, loginUser } from '../api/auth.api';
 
 interface LoginComponentProps {
   logoImage: any;
-  onLogin: (username: string, password: string) => void;
 }
 
-const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage, onLogin }) => {
-  const [username, setUsername] = useState('');
+const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({
-    username: '',
+    email: '',
     password: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateFields = () => {
     let valid = true;
     const newErrors = {
-      username: '',
+      email: '',
       password: ''
     };
 
-    if (!username.trim()) {
-      newErrors.username = 'El usuario es requerido';
+    if (!email.trim()) {
+      newErrors.email = 'El email es requerido';
+      valid = false;
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.email = 'Email no válido';
       valid = false;
     }
 
     if (!password.trim()) {
       newErrors.password = 'La contraseña es requerida';
+      valid = false;
+    } else if (password.length < 6) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
       valid = false;
     }
 
@@ -45,9 +56,23 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage, onLogin }) =
     return valid;
   };
 
-  const handleLogin = () => {
-    if (validateFields()) {
-      onLogin(username, password);
+  const handleLogin = async () => {
+    if (!validateFields()) return;
+    
+    setIsLoading(true);
+    try {
+      const { token, user } = await loginUser({ email, password }) as LoginResponse;
+      
+      // Navegar a MainScreen pasando el token y la información del usuario
+      navigation.replace('Main', { 
+        token,
+        user
+      });
+      
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Error al iniciar sesión');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -57,28 +82,26 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage, onLogin }) =
       style={styles.container}
     >
       <View style={styles.loginContainer}>
-        {/* Imagen del logo */}
         <Image 
           source={logoImage} 
           style={styles.logo} 
           resizeMode="contain"
         />
 
-        {/* Campo de usuario */}
         <TextInput
-          style={[styles.input, errors.username ? styles.inputError : null]}
-          placeholder="Username"
+          style={[styles.input, errors.email ? styles.inputError : null]}
+          placeholder="Email"
           placeholderTextColor="#999"
-          value={username}
+          value={email}
           onChangeText={(text) => {
-            setUsername(text);
-            setErrors({...errors, username: ''});
+            setEmail(text);
+            setErrors({...errors, email: ''});
           }}
           autoCapitalize="none"
+          keyboardType="email-address"
         />
-        {errors.username ? <Text style={styles.errorText}>{errors.username}</Text> : null}
+        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
-        {/* Campo de contraseña */}
         <TextInput
           style={[styles.input, errors.password ? styles.inputError : null]}
           placeholder="Password"
@@ -92,11 +115,14 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage, onLogin }) =
         />
         {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
 
-        
-      
-        {/* Botón de login */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>LOGIN</Text>
+        <TouchableOpacity 
+          style={styles.loginButton} 
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text style={styles.loginButtonText}>
+            {isLoading ? 'CARGANDO...' : 'LOGIN'}
+          </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
