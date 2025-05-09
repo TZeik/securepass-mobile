@@ -2,11 +2,27 @@
 
 export type RootStackParamList = {
   Login: undefined;
-  Main: undefined;
-  Scanner: { onScanned: (value: string) => void };
-  AccessDetails: undefined;
-  PersonDetail: {
-    person: any
+  Main: {
+    token: string;
+    user: {
+      _id: string;
+      name: string;
+      email: string;
+      role: string;
+      apartment?: string;
+      tel?: string;
+      shift?: string;
+      registerDate: string;
+    };
   };
-  ExitRegistration: undefined;
+  Scanner: {
+    onScanned: (value: string) => void;
+    token: string;
+  };
+  AccessDetails: {
+    token: string;
+  };
+  ExitRegistration: {
+    token: string;
+  };
 };
