@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types/types";
 import { getAuthenticatedUser, loginUser, setAuthToken } from "../../api/auth.api";
-import { LoginResponse } from "../../types/auth.types";
+
 interface LoginComponentProps {
   logoImage: any;
 }
@@ -24,22 +24,20 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({
-    email: "",
-    password: "",
+    email: "", // Estado para errores de email
+    password: "", // Estado para errrores de contraseña
+    credentials: "", // Estado para errores de credenciales
   });
-  // useState para representar carga de datos en botón
   const [isLoading, setIsLoading] = useState(false);
 
   const validateFields = () => {
     let valid = true;
     const newErrors = {
-      email: "",
-      password: "",
+      email: "", // Resetear errores de email al validar
+      password: "", // Resetear errores de contraseña al validar
+      credentials: "", // Resetear error de credenciales al validar
     };
 
-    {
-      /* Validador de Email*/
-    }
     if (!email.trim()) {
       newErrors.email = "El email es requerido";
       valid = false;
@@ -48,14 +46,11 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
       valid = false;
     }
 
-    {
-      /* Validador de contraseña */
-    }
     if (!password.trim()) {
       newErrors.password = "La contraseña es requerida";
       valid = false;
     } else if (password.length < 8) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
+      newErrors.password = "La contraseña debe tener al menos 8 caracteres";
       valid = false;
     }
 
@@ -68,18 +63,27 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
 
     setIsLoading(true);
     try {
+      // Solo tomo el token de la respuesta y lo valido con el request api/auth/me
       const { token } = await loginUser({ email, password });
       setAuthToken(token);
 
-      // Verificación adicional del usuario
+      // api/auth/me
       const verifiedUser = await getAuthenticatedUser();
 
       navigation.replace("Main", {
         token,
-        user: verifiedUser, // Usamos el usuario verificado
+        user: verifiedUser,
       });
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Error al iniciar sesión");
+      // Manejo específico de errores de credenciales
+      if (error.message.includes("Credenciales inválidas")) {
+        setErrors({
+          ...errors,
+          credentials: "Email o contraseña incorrectos",
+        });
+      } else {
+        Alert.alert("Error", error.message || "Error al iniciar sesión");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +94,6 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      {/* Imagen del Logo */}
       <View style={styles.loginContainer}>
         <Image source={logoImage} style={styles.logo} resizeMode="contain" />
 
@@ -102,7 +105,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
           value={email}
           onChangeText={(text) => {
             setEmail(text);
-            setErrors({ ...errors, email: "" });
+            setErrors({ ...errors, email: "", credentials: "" });
           }}
           autoCapitalize="none"
           keyboardType="email-address"
@@ -119,12 +122,19 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
           value={password}
           onChangeText={(text) => {
             setPassword(text);
-            setErrors({ ...errors, password: "" });
+            setErrors({ ...errors, password: "", credentials: "" });
           }}
           secureTextEntry
         />
         {errors.password ? (
           <Text style={styles.errorText}>{errors.password}</Text>
+        ) : null}
+
+        {/* Mensaje de error de credenciales */}
+        {errors.credentials ? (
+          <Text style={[styles.errorText, styles.credentialsError]}>
+            {errors.credentials}
+          </Text>
         ) : null}
 
         {/* Botón de Login */}
@@ -133,7 +143,6 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
           onPress={handleLogin}
           disabled={isLoading}
         >
-          {/* Se cambia el valor del botón si el useState is Login es true o false */}
           <Text style={styles.loginButtonText}>
             {isLoading ? "CARGANDO..." : "LOGIN"}
           </Text>
@@ -175,17 +184,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 12,
   },
-  optionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  optionText: {
-    color: "#555",
-  },
-  forgotPassword: {
-    color: "#007AFF",
+  credentialsError: {
+    textAlign: "center",
+    marginBottom: 15,
+    fontSize: 14,
   },
   loginButton: {
     backgroundColor: "#007AFF",
