@@ -12,9 +12,9 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
-import { LoginResponse, loginUser } from "../api/auth.api";
-
+import { RootStackParamList } from "../types/types";
+import { loginUser, setAuthToken } from "../api/auth.api";
+import { LoginResponse } from "../types/auth.types";
 interface LoginComponentProps {
   logoImage: any;
 }
@@ -68,7 +68,9 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
       const { token, user } = (await loginUser({
         email,
         password,
-      })) as LoginResponse;
+      }));
+
+      setAuthToken(token); // Token configurado globalmente
 
       // Uso mi useNavigation para ir a MainScreen pasando el token y la información del usuario.
       navigation.replace("Main", {

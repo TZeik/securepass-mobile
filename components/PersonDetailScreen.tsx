@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Text, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 
 type PersonDetailScreenProps = NativeStackScreenProps<RootStackParamList, "PersonDetail">;
 

@@ -4,32 +4,12 @@ import LoginComponent from "./components/LoginComponent";
 import MainScreen from "./components/MainScreen";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import QRCodeScanner from "./components/QRCodeScanner";
-import { RootStackParamList } from "./types";
+import { RootStackParamList } from "./types/types";
 import QRScannerScreen from "./components/QRCodeScanner";
 import AccessDetailsScreen from "./components/AccessDetailsScreen";
 import PersonDetailScreen from "./components/PersonDetailScreen";
 import ExitRegistrationScreen from "./components/ExitRegistrationScreen";
-
-type LoginScreenProps = NativeStackScreenProps<RootStackParamList, "Login">;
-
-function LoginScreen({ navigation }: LoginScreenProps) {
-  const handleLogin = (username: string, password: string) => {
-    console.log("Login attempt with:", { username, password });
-    navigation.navigate("Main");
-  };
-
-  return (
-    <>
-      <StatusBar style="auto" />
-      <LoginComponent
-        logoImage={require("./assets/Guardia.png")}
-        onLogin={handleLogin}
-      />
-    </>
-  );
-}
+import { setAuthToken } from "./api/auth.api";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -45,25 +25,39 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 }
  */
 //onScanned={handleScanned}
+
 export default function Navigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
-          name="Scanner"
-          component={QRScannerScreen}
-          options={{ title: "Escanear QR" }}
-        />
-
-        <Stack.Screen
           name="Login"
-          component={LoginScreen}
           options={{ headerShown: false }}
-        />
+        >
+          {(props) => (
+            <>
+              <StatusBar style="auto" />
+              <LoginComponent
+                logoImage={require("./assets/Guardia.png")}
+                {...props}
+              />
+            </>
+          )}
+        </Stack.Screen>
+
         <Stack.Screen
           name="Main"
           component={MainScreen}
-          options={{ title: "Control de acceso" }}
+          options={{ 
+            title: "Control de acceso",
+            headerBackVisible: false // Evita el botón de retroceso
+          }}
+        />
+
+        <Stack.Screen
+          name="Scanner"
+          component={QRScannerScreen}
+          options={{ title: "Escanear QR" }}
         />
 
         <Stack.Screen

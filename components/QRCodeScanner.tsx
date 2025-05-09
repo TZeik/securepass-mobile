@@ -3,7 +3,7 @@ import React, { useEffect ,useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import {BarCodeScannerResult } from 'expo-barcode-scanner';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { RootStackParamList } from '../types';
+import { RootStackParamList } from '../types/types';
 
 
 type ScannerRouteProp = RouteProp<RootStackParamList, 'Scanner'>;

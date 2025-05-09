@@ -16,10 +16,13 @@ export type RootStackParamList = {
     };
   };
   Scanner: {
-    onScanned: (value: string) => void;
+    onScanned?: (value: string) => void;
     token: string;
   };
   AccessDetails: {
+    token: string;
+  };
+  PersonDetail: {
     token: string;
   };
   ExitRegistration: {

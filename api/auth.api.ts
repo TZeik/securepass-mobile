@@ -1,26 +1,7 @@
 import axios from "axios";
+import { LoginData, LoginResponse } from "../types/auth.types";
 
 const API_URL = "http://localhost:8000/api";
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  token: string;
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-    role: string;
-    apartment?: string;
-    tel?: string;
-    shift?: string;
-    registerDate: string;
-  };
-  expiresIn: number;
-}
 
 export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
   try {
@@ -45,3 +26,5 @@ export const setAuthToken = (token: string | null) => {
     delete axios.defaults.headers.common['Authorization'];
   }
 };
+
+export { LoginResponse };
