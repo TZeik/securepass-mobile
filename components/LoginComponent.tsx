@@ -61,9 +61,10 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
     
     setIsLoading(true);
     try {
+      // Como antes tomamos la información del token y del usuario
       const { token, user } = await loginUser({ email, password }) as LoginResponse;
       
-      // Navegar a MainScreen pasando el token y la información del usuario
+      // Uso mi useNavigation para ir a MainScreen pasando el token y la información del usuario.
       navigation.replace('Main', { 
         token,
         user
