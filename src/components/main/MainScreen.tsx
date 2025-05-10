@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Text, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../types/types";
-import { getAuthenticatedUser, setAuthToken } from "../../api/auth.api";
+import { getAuthenticatedUser } from "../../api/auth.api";
+import {
+  delToken,
+  loadToken,
+  saveToken,
+  setAuthToken,
+} from "@/services/auth.service";
+import LogoutConfirmationModal from "../auth/LogoutModal";
 
 type MainScreenProps = NativeStackScreenProps<RootStackParamList, "Main">;
 
@@ -10,6 +17,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation, route }) => {
   const { token } = route.params;
   const [user, setUser] = useState(route.params.user);
   const [loading, setLoading] = useState(false);
+const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const verifySession = async () => {
@@ -19,6 +27,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation, route }) => {
         const currentUser = await getAuthenticatedUser();
         setUser(currentUser);
       } catch (error: any) {
+        console.error("Se produjo un error al verificar sesión", error);
         Alert.alert("Error", error.message);
         navigation.replace("Login");
       } finally {
@@ -46,31 +55,60 @@ const MainScreen: React.FC<MainScreenProps> = ({ navigation, route }) => {
     navigation.navigate("ExitRegistration", { token });
   };
 
+  const handleLogoutRequest = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    setAuthToken(null);
+    delToken();
+    navigation.replace('Login');
+    setShowLogoutModal(false);
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
+
   return (
     // Al entrar presentar al usuario autenticado
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Bienvenido, {user.name}</Text>
 
       <TouchableOpacity
-        style={[styles.button, styles.primaryButton]}
+        style={[styles.button, styles.entryButton]}
         onPress={handleRegistrarAcceso}
       >
         <Text style={styles.buttonText}>Registrar Entrada</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.button, styles.tertiaryButton]}
+        style={[styles.button, styles.exitButton]}
         onPress={handleRegistrarSalida}
       >
         <Text style={styles.buttonText}>Registrar Salida</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.button, styles.secondaryButton]}
+        style={[styles.button, styles.residentsButton]}
         onPress={handleDetallesAcceso}
       >
         <Text style={styles.buttonText}>Residentes</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.logoutButton]}
+        onPress={handleLogoutRequest}
+      >
+        <Text style={styles.buttonText}>Cerrar Sesión</Text>
+      </TouchableOpacity>
+
+      <LogoutConfirmationModal
+        visible={showLogoutModal}
+        onCancel={handleCancelLogout}
+        onConfirm={handleConfirmLogout}
+      />
     </View>
   );
 };
@@ -93,14 +131,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 10,
   },
-  primaryButton: {
-    backgroundColor: "#007AFF",
+  entryButton: {
+    backgroundColor: "#2BAEFA",
   },
-  secondaryButton: {
-    backgroundColor: "#34C759",
+  exitButton: {
+    backgroundColor: "#FA812B",
   },
-  tertiaryButton: {
-    backgroundColor: "#FF3B30",
+  residentsButton: {
+    backgroundColor: "#11CC4F",
+  },
+  logoutButton: {
+    backgroundColor: "#FA392B",
   },
   buttonText: {
     color: "#fff",

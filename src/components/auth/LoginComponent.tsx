@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,8 +13,13 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types/types";
-import { getAuthenticatedUser, loginUser, setAuthToken } from "../../api/auth.api";
-
+import { getAuthenticatedUser, loginUser } from "../../api/auth.api";
+import {
+  getAuthToken,
+  loadToken,
+  saveToken,
+  setAuthToken,
+} from "@/services/auth.service";
 interface LoginComponentProps {
   logoImage: any;
 }
@@ -28,7 +33,30 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
     password: "", // Estado para errrores de contraseña
     credentials: "", // Estado para errores de credenciales
   });
+  const [pageLoading, setPageLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Use Effect para verificar si hay un usuario autenticado antes de realizar Login
+  useEffect(() => {
+    const validateLogedOnUser = async () => {
+      try {
+        setAuthToken(await loadToken());
+        const tokenLogedOn = getAuthToken();
+        const userLogedOn = await getAuthenticatedUser();
+
+          navigation.replace("Main", {
+            token: tokenLogedOn,
+            user: userLogedOn,
+          });
+
+      } catch (error) {
+        console.log('Sesión anterior no encontrada o expirada');
+      } finally {
+        setPageLoading(false);
+      }
+    };
+    validateLogedOnUser();
+  }, []);
 
   const validateFields = () => {
     let valid = true;
@@ -66,9 +94,13 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
       // Solo tomo el token de la respuesta y lo valido con el request api/auth/me
       const { token } = await loginUser({ email, password });
       setAuthToken(token);
+      await saveToken(token);
 
       // api/auth/me
       const verifiedUser = await getAuthenticatedUser();
+
+      if (verifiedUser.role == "residente")
+        throw new Error("Usuario no puede ser residente");
 
       navigation.replace("Main", {
         token,
@@ -81,15 +113,29 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
           ...errors,
           credentials: "Email o contraseña incorrectos",
         });
+      } else if (error.message.includes("Usuario no puede ser residente")) {
+        setErrors({
+          ...errors,
+          credentials: "El usuario no puede ser residente",
+        });
       } else {
         Alert.alert("Error", error.message || "Error al iniciar sesión");
+        setErrors({
+          ...errors,
+          credentials: "Ocurrió un error al iniciar sesión",
+        });
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
+  if (pageLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      </View>
+    );
+  } else return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
