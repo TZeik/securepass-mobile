@@ -9,7 +9,6 @@ import QRScannerScreen from "../components/main/QRCodeScanner";
 import AccessDetailsScreen from "../components/main/AccessDetailsScreen";
 import PersonDetailScreen from "../components/main/PersonDetailScreen";
 import ExitRegistrationScreen from "../components/main/ExitRegistrationScreen";
-import { setAuthToken } from "../api/auth.api";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
