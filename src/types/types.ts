@@ -1,31 +1,27 @@
-// Define los tipos para tus rutas
+import { User } from "./user.types";
 
 export type RootStackParamList = {
   Login: undefined;
+
   Main: {
     token: string;
-    user: {
-      _id: string;
-      name: string;
-      email: string;
-      role: string;
-      apartment?: string;
-      tel?: string;
-      shift?: string;
-      registerDate: string;
-    };
+    user: User;
   };
+
   Scanner: {
     onScanned?: (value: string) => void;
     token: string;
   };
-  AccessDetails: {
-    token: string;
+
+  ResidentDetail: {
+    resident: User;
   };
-  PersonDetail: {
+
+  ResidentList: {
     token: string;
-    person: any;
+    user: User;
   };
+
   ExitRegistration: {
     token: string;
   };
