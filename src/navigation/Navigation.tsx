@@ -6,9 +6,9 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { RootStackParamList } from "../types/types";
 import QRScannerScreen from "../components/main/QRCodeScanner";
-import AccessDetailsScreen from "../components/main/AccessDetailsScreen";
-import PersonDetailScreen from "../components/main/PersonDetailScreen";
 import ExitRegistrationScreen from "../components/main/ExitRegistrationScreen";
+import ResidentList from "../components/resident/ResidentList";
+import ResidentDetail from "../components/resident/ResidentDetail";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -48,7 +48,7 @@ export default function Navigation() {
           name="Main"
           component={MainScreen}
           options={{ 
-            title: "Control de acceso",
+            title: "SecurePass Control de Acceso",
             headerBackVisible: false // Evita el botón de retroceso
           }}
         />
@@ -60,15 +60,15 @@ export default function Navigation() {
         />
 
         <Stack.Screen
-          name="AccessDetails"
-          component={AccessDetailsScreen}
-          options={{ title: "Detalles de Acceso" }}
+          name="ResidentDetail"
+          component={ResidentDetail}
+          options={{ title: "Detalles de Residente" }}
         />
 
         <Stack.Screen
-          name="PersonDetail"
-          component={PersonDetailScreen}
-          options={{ title: "Detalles de Persona" }}
+          name="ResidentList"
+          component={ResidentList}
+          options={{ title: "Lista de Residentes" }}
         />
 
         <Stack.Screen

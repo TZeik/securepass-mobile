@@ -2,21 +2,26 @@ import { User } from "./user.types";
 
 export type RootStackParamList = {
   Login: undefined;
+
   Main: {
     token: string;
     user: User;
   };
+
   Scanner: {
     onScanned?: (value: string) => void;
     token: string;
   };
-  AccessDetails: {
-    token: string;
+
+  ResidentDetail: {
+    resident: User;
   };
-  PersonDetail: {
+
+  ResidentList: {
     token: string;
-    person: any;
+    user: User;
   };
+
   ExitRegistration: {
     token: string;
   };

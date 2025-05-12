@@ -24,8 +24,7 @@ const [showLogoutModal, setShowLogoutModal] = useState(false);
       try {
         setLoading(true);
         setAuthToken(token);
-        const currentUser = await getAuthenticatedUser();
-        setUser(currentUser);
+        setUser(await getAuthenticatedUser());
       } catch (error: any) {
         console.error("Se produjo un error al verificar sesión", error);
         Alert.alert("Error", error.message);
@@ -47,8 +46,8 @@ const [showLogoutModal, setShowLogoutModal] = useState(false);
     });
   };
 
-  const handleDetallesAcceso = () => {
-    navigation.navigate("AccessDetails", { token });
+  const handleResidentList = () => {
+    navigation.navigate("ResidentList", { token, user });
   };
 
   const handleRegistrarSalida = () => {
@@ -92,7 +91,7 @@ const [showLogoutModal, setShowLogoutModal] = useState(false);
 
       <TouchableOpacity
         style={[styles.button, styles.residentsButton]}
-        onPress={handleDetallesAcceso}
+        onPress={handleResidentList}
       >
         <Text style={styles.buttonText}>Residentes</Text>
       </TouchableOpacity>
