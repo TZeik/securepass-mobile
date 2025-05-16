@@ -17,7 +17,7 @@ export type RootStackParamList = {
     resident: User;
   };
 
-  EntryForm: undefined;
+  EntryForm: { qrData: string };
 
 
   ResidentList: {
