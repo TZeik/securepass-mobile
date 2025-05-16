@@ -1,11 +1,15 @@
 import axios from "axios";
 import { VisitData, VisitResponse } from "../types/visit.types";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = "http://api.asolutions.digital/api";
 
-export const getVisitsByResidentId = async (id: string): Promise<VisitResponse[]> => {
+export const getVisitsByResidentId = async (
+  id: string
+): Promise<VisitResponse[]> => {
   try {
-    const response = await axios.get<VisitResponse[]>(`${API_URL}/visits/resident/${id}`);
+    const response = await axios.get<VisitResponse[]>(
+      `${API_URL}/visits/resident/${id}`
+    );
     const visits = response.data.map((visit: any) => ({
       ...visit,
       createdAt: new Date(visit.createdAt),
@@ -13,23 +17,81 @@ export const getVisitsByResidentId = async (id: string): Promise<VisitResponse[]
       authorization: {
         ...visit.authorization,
         date: new Date(visit.authorization.date),
-        exp: visit.authorization.exp? new Date(visit.authorization.exp) : undefined,
+        exp: visit.authorization.exp
+          ? new Date(visit.authorization.exp)
+          : undefined,
       },
-      registry: visit.registry? {
-        ...visit.registry,
-        entry: visit.registry.entry? {
-          ...visit.registry.entry,
-          date: visit.registry.entry.date? new Date(visit.registry.entry.date) : undefined,
-        } : undefined,
-        exit: visit.registry.exit? {
-          ...visit.registry.exit,
-          date: visit.registry.entry.date? new Date(visit.registry.exit.date) : undefined,
-        } : undefined
-      } : undefined,
-    }))
+      registry: visit.registry
+        ? {
+            ...visit.registry,
+            entry: visit.registry.entry
+              ? {
+                  ...visit.registry.entry,
+                  date: visit.registry.entry.date
+                    ? new Date(visit.registry.entry.date)
+                    : undefined,
+                }
+              : undefined,
+            exit: visit.registry.exit
+              ? {
+                  ...visit.registry.exit,
+                  date: visit.registry.entry.date
+                    ? new Date(visit.registry.exit.date)
+                    : undefined,
+                }
+              : undefined,
+          }
+        : undefined,
+    }));
     return visits;
-  }catch(error: any){
+  } catch (error: any) {
     console.error(`Error al obtener los datos de la visita`, error);
     throw error;
   }
-}
+};
+
+export const getVisitsByQRId = async (id: string): Promise<VisitResponse> => {
+  try {
+    const response = await axios.get<VisitResponse>(
+      `${API_URL}/visits/qr/${id}`
+    );
+    const visit = response.data;
+
+    return {
+      ...visit,
+      createdAt: new Date(visit.createdAt),
+      updatedAt: new Date(visit.updatedAt),
+      authorization: {
+        ...visit.authorization,
+        date: new Date(visit.authorization.date),
+        exp: visit.authorization.exp
+          ? new Date(visit.authorization.exp)
+          : new Date(0),
+      },
+      registry: visit.registry
+        ? {
+            ...visit.registry,
+            entry: visit.registry.entry
+              ? {
+                  ...visit.registry.entry,
+                  date: visit.registry.entry.date
+                    ? new Date(visit.registry.entry.date)
+                    : undefined,
+                }
+              : undefined,
+            exit: visit.registry.exit
+              ? {
+                  ...visit.registry.exit,
+                  date: visit.registry.exit.date
+                    ? new Date(visit.registry.exit.date)
+                    : undefined,
+                }
+              : undefined,
+          }
+        : undefined,
+    };
+  } catch (error: any) {
+    console.error(`Error al obtener los datos de la visita`, error);
+    throw error;
+  }
+};

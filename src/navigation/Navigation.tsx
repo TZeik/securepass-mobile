@@ -9,6 +9,7 @@ import QRScannerScreen from "../components/main/QRCodeScanner";
 import ExitRegistrationScreen from "../components/main/ExitRegistrationScreen";
 import ResidentList from "../components/resident/ResidentList";
 import ResidentDetail from "../components/resident/ResidentDetail";
+import EntryForm from "@/components/main/EntryForm";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -57,6 +58,12 @@ export default function Navigation() {
           name="Scanner"
           component={QRScannerScreen}
           options={{ title: "Escanear QR" }}
+        />
+
+         <Stack.Screen
+          name="EntryForm"
+          component={EntryForm}
+          options={{ title: "Formulario de registrar acceso" }}
         />
 
         <Stack.Screen

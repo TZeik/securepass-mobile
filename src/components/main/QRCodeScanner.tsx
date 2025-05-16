@@ -2,13 +2,17 @@ import { Camera, CameraType, CameraView, useCameraPermissions} from 'expo-camera
 import React, { useEffect ,useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import {BarCodeScannerResult } from 'expo-barcode-scanner';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation,NavigationProp} from '@react-navigation/native';
 import { RootStackParamList } from '../../types/types';
+import Navigation from '@/navigation/Navigation';
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import axios from 'axios';
 
 type ScannerRouteProp = RouteProp<RootStackParamList, 'Scanner'>;
-
+type Nav = NavigationProp<RootStackParamList>;
 export default function QRScannerScreen() {
   const route = useRoute<ScannerRouteProp>();
+  const navigation = useNavigation<Nav>();
   const { onScanned, token } = route.params;
 
   const [cameraType, setCameraType] = useState<CameraType>("back");
@@ -23,17 +27,32 @@ export default function QRScannerScreen() {
     })();
   }, []);
  
-  const handleBarCodeScanned = ({ data }: BarCodeScannerResult) => {
+    const handleBarCodeScanned = ({ data }: BarCodeScannerResult) => {
     if (!scanned) {
       setScanned(true);
       setScannedData(data);
-      
-      // Verificamos si onScanned existe antes de llamarlo
+
       if (onScanned) {
         onScanned(data);
       }
-      
-      Alert.alert('Código escaneado', data);
+
+      // Condición simulada (puedes usar data, token u otra cosa)
+      const condicionValida = data.startsWith("VALIDO_"); // ejemplo: cambia por lo que necesites
+
+      Alert.alert(
+        'Código escaneado',
+        data,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              
+                navigation.navigate('EntryForm');
+               
+            }
+          }
+        ]
+      );
     }
   }; 
 

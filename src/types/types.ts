@@ -17,6 +17,9 @@ export type RootStackParamList = {
     resident: User;
   };
 
+  EntryForm: undefined;
+
+
   ResidentList: {
     token: string;
     user: User;

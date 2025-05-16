@@ -20,7 +20,7 @@ const ResidentDetail: React.FC<ResidentDetailScreenProps> = ({ route }) => {
   useEffect(() => {
     const getVisits = async () => {
       try {
-        setVisits(await getVisitsByResidentId("6820d5950387b07e020b4af5"));
+        setVisits(await getVisitsByResidentId(resident._id));
         setIsLoading(false);
       } catch (error) {
         console.error(`Ocurrio un error al obtener visitas`, error);
