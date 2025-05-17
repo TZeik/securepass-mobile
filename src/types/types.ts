@@ -17,7 +17,7 @@ export type RootStackParamList = {
     resident: User;
   };
 
-  EntryForm: { qrData: string };
+  EntryForm: { qrData: string};
 
 
   ResidentList: {

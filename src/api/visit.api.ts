@@ -1,5 +1,5 @@
 import axios from "axios";
-import { VisitData, VisitResponse } from "../types/visit.types";
+import { RegistryData, VisitData, VisitResponse } from "../types/visit.types";
 
 const API_URL = "http://api.asolutions.digital/api";
 
@@ -96,49 +96,15 @@ export const getVisitsByQRId = async (id: string): Promise<VisitResponse> => {
   }
 };
 
-export const getVisitsArrByQRId = async (
-  id: string
-): Promise<VisitResponse[]> => {
+export const RegisterEntry = async (
+  data: RegistryData,
+  status: 'aprobada' | 'rechazada'
+) => {
   try {
-    const response = await axios.get<VisitResponse[]>(
-      `${API_URL}/visits/qr/${id}`
-    );
-    const visits = response.data.map((visit: any) => ({
-      ...visit,
-      createdAt: new Date(visit.createdAt),
-      updatedAt: new Date(visit.updatedAt),
-      authorization: {
-        ...visit.authorization,
-        date: new Date(visit.authorization.date),
-        exp: visit.authorization.exp
-          ? new Date(visit.authorization.exp)
-          : undefined,
-      },
-      registry: visit.registry
-        ? {
-            ...visit.registry,
-            entry: visit.registry.entry
-              ? {
-                  ...visit.registry.entry,
-                  date: visit.registry.entry.date
-                    ? new Date(visit.registry.entry.date)
-                    : undefined,
-                }
-              : undefined,
-            exit: visit.registry.exit
-              ? {
-                  ...visit.registry.exit,
-                  date: visit.registry.entry.date
-                    ? new Date(visit.registry.exit.date)
-                    : undefined,
-                }
-              : undefined,
-          }
-        : undefined,
-    }));
-    return visits;
-  } catch (error: any) {
-    console.error(`Error al obtener los datos de la visita`, error);
+    const response = await axios.put(`${API_URL}/visits/entry/?status=${status}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar estado de visita:', error);
     throw error;
   }
 };

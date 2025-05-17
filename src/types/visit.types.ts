@@ -54,3 +54,8 @@ interface visitResident {
     name: string;
     apartment: string;
 }
+
+export interface RegistryData{
+    qrId: string;
+    guardId: string;
+}
