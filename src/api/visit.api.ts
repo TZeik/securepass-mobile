@@ -98,7 +98,7 @@ export const getVisitsByQRId = async (id: string): Promise<VisitResponse> => {
 
 export const RegisterEntry = async (
   data: RegistryData,
-  status: 'aprobada' | 'rechazada'
+  status: 'aprobada' | 'rechazada' | 'finalizada',
 ) => {
   try {
     const response = await axios.put(`${API_URL}/visits/entry/?status=${status}`, data);

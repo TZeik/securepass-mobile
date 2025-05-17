@@ -26,6 +26,7 @@ export type RootStackParamList = {
   };
 
   ExitRegistration: {
+    onScanned?: (value: string) => void;
     token: string;
   };
 };
