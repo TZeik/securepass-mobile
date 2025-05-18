@@ -1,4 +1,3 @@
-
 import {
   Camera,
   CameraType,
@@ -18,25 +17,25 @@ import { RootStackParamList } from "../../types/types";
 import Navigation from "@/navigation/Navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
-import { VisitResponse } from "@/types/visit.types";
-import { getVisitsByQRId } from "@/api/visit.api";
+import { RegistryData, VisitResponse } from "@/types/visit.types";
+import { getVisitsByQRId, RegisterEntry } from "@/api/visit.api";
+import { loadToken, setAuthToken } from "@/services/auth.service";
+import { getAuthenticatedUser } from "@/api/auth.api";
+import { User } from "@/types/user.types";
 
 type ScannerRouteProp = RouteProp<RootStackParamList, "ExitRegistration">;
 type Nav = NavigationProp<RootStackParamList>;
 export default function ExitRegistrationScreen() {
   const route = useRoute<ScannerRouteProp>();
   const navigation = useNavigation<Nav>();
-  const { onScanned, token } = route.params;
+  const { qrData } = route.params;
 
   const [cameraType, setCameraType] = useState<CameraType>("back");
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
-
-  const [visits, setVisits] = useState<VisitResponse[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  
+  const [guard, setGuard] = useState<User | null>(null);
+  const [authToken, setAuthTokenState] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -45,40 +44,83 @@ export default function ExitRegistrationScreen() {
     })();
   }, []);
 
-  
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const token = await loadToken();
+        setAuthTokenState(token);
+        setAuthToken(token);
+
+        if (token) {
+          const user = await getAuthenticatedUser();
+          setGuard(user);
+        }
+      } catch (error) {
+        console.error("Error autenticando:", error);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  // Simula la carga desde una API
+  const [visits, setVisits] = useState<VisitResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const getVisits = async () => {
+      try {
+        setVisits(await getVisitsByQRId(qrData));
+        setIsLoading(false);
+      } catch (error) {
+        console.error(`Ocurrio un error al obtener visitas`, error);
+      }
+    };
+    getVisits();
+  }, []);
+
+  const finalizarVisita = async () => {
+    const payload: RegistryData = {
+      qrId: visits!.qrId,
+      guardId: guard!._id,
+    };
+    try {
+      await RegisterEntry(payload, "finalizada");
+      Alert.alert("Éxito", "La visita fue finalizada");
+    } catch (error) {
+      Alert.alert("Error", "No se pudo finalizar la visita");
+    }
+  };
 
   const handleBarCodeScanned = async ({ data }: BarCodeScannerResult) => {
-  if (!scanned) {
-    setScanned(true);
-    setScannedData(data);
+    if (!scanned) {
+      setScanned(true);
+      setScannedData(data);
 
-    try {
-      const visit = await getVisitsByQRId(data); // valida contra la API
+      try {
+        const visit = await getVisitsByQRId(data); // valida contra la API
 
-      if(visit.qrId === data){
-
-      Alert.alert('Éxito', 'QR válido, Visita finalizada', [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('EntryForm', { qrData: data}), // pasa los datos si quieres
-        },
-      ]);
-      }
-
-    } catch (error) {
-      console.error('QR inválido o no encontrado:', error);
-      Alert.alert('Error', 'El QR no está registrado.', [
-        {
-          text: 'OK',
-          onPress: () => {
-            setScanned(false); // permite escanear de nuevo
+        if (visit.qrId === data) {
+          finalizarVisita();
+          Alert.alert("Éxito", "QR válido, Visita finalizada", [
+            {
+              text: "OK",
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("QR inválido o no encontrado:", error);
+        Alert.alert("Error", "El QR no está registrado.", [
+          {
+            text: "OK",
+            onPress: () => {
+              setScanned(false); // permite escanear de nuevo
+            },
           },
-        },
-      ]);
+        ]);
+      }
     }
-  }
-};
-
+  };
 
   if (hasPermission === null) {
     return <Text>Solicitando permiso de cámara...</Text>;

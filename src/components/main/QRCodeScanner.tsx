@@ -32,8 +32,7 @@ export default function QRScannerScreen() {
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
 
-  const [visits, setVisits] = useState<VisitResponse[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+ 
 
   
 

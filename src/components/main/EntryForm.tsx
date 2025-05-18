@@ -92,8 +92,7 @@ const finalizarVisita = async () => {
   const payload: RegistryData = {
     qrId: visits!.qrId,
     guardId: guard!._id
-  };
-
+  } ;
   try {
     await RegisterEntry(payload, 'finalizada');
     Alert.alert('Éxito', 'La visita fue finalizada');
