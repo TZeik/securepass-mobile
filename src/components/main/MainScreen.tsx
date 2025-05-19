@@ -10,53 +10,45 @@ import {
   setAuthToken,
 } from "@/services/auth.service";
 import LogoutConfirmationModal from "../auth/LogoutModal";
+import { User } from "@/types/user.types";
 
 type MainScreenProps = NativeStackScreenProps<RootStackParamList, "Main">;
 
-const MainScreen: React.FC<MainScreenProps> = ({ navigation, route }) => {
-  const { token } = route.params;
-  const [user, setUser] = useState(route.params.user);
+const MainScreen: React.FC<MainScreenProps> = ({ navigation}) => {
+  const [user, setUser] = useState<User | null >(null);
   const [loading, setLoading] = useState(false);
-const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  
 
   useEffect(() => {
     const verifySession = async () => {
       try {
         setLoading(true);
-        setAuthToken(token);
+        setAuthToken(await loadToken());
         setUser(await getAuthenticatedUser());
       } catch (error: any) {
         console.error("Se produjo un error al verificar sesión", error);
         Alert.alert("Error", error.message);
         navigation.replace("Login");
+        delToken();
       } finally {
         setLoading(false);
       }
     };
 
     verifySession();
-  }, [token]);
+  }, []);
 
   const handleRegistrarAcceso = () => {
-    navigation.navigate("Scanner", {
-      onScanned: (value: string) => {
-        console.log("Escaneado:", value);
-      },
-      token,
-    });
+    navigation.navigate("Scanner", {state: 'entry'});
   };
 
   const handleResidentList = () => {
-    navigation.navigate("ResidentList", { token, user });
+    navigation.navigate("ResidentList", { user: user as User });
   };
 
   const handleRegistrarSalida = () => {
-    navigation.navigate("ExitRegistration", {
-      onScanned: (value: string) => {
-        console.log("Escaneado:", value);
-      },
-      token
-    });
+    navigation.navigate("Scanner", {state: 'exit'});
   };
 
   const handleLogoutRequest = () => {
@@ -78,7 +70,7 @@ const [showLogoutModal, setShowLogoutModal] = useState(false);
   return (
     // Al entrar presentar al usuario autenticado
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Bienvenido, {user.name}</Text>
+      <Text style={styles.welcomeText}>Bienvenido, {user?.name}</Text>
 
       <TouchableOpacity
         style={[styles.button, styles.entryButton]}

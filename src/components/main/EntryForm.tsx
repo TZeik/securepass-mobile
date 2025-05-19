@@ -83,6 +83,7 @@ const aprobarVisita = async () => {
   try {
     await RegisterEntry(payload, 'aprobada');
     Alert.alert('Éxito', 'La visita fue aprobada');
+    navigation.navigate("Main");
   } catch (error) {
     Alert.alert('Error', 'No se pudo aprobar la visita');
   }
@@ -97,6 +98,7 @@ const rechazarVisita = async () => {
   try {
     await RegisterEntry(payload, 'rechazada');
     Alert.alert('Éxito', 'La visita fue rechazada');
+    navigation.navigate("Main");
   } catch (error) {
     Alert.alert('Error', 'No se pudo rechazar la visita');
   }

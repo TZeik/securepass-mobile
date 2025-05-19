@@ -41,16 +41,11 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
     const validateLogedOnUser = async () => {
       try {
         setAuthToken(await loadToken());
-        const tokenLogedOn = getAuthToken();
-        const userLogedOn = await getAuthenticatedUser();
+        await getAuthenticatedUser();
 
-          navigation.replace("Main", {
-            token: tokenLogedOn,
-            user: userLogedOn,
-          });
-
+        navigation.replace("Main");
       } catch (error) {
-        console.log('Sesión anterior no encontrada o expirada');
+        console.log("Sesión anterior no encontrada o expirada");
       } finally {
         setPageLoading(false);
       }
@@ -102,10 +97,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
       if (verifiedUser.role == "residente")
         throw new Error("Usuario no puede ser residente");
 
-      navigation.replace("Main", {
-        token,
-        user: verifiedUser,
-      });
+      navigation.replace("Main");
     } catch (error: any) {
       // Manejo específico de errores de credenciales
       if (error.message.includes("Credenciales inválidas")) {
@@ -132,70 +124,72 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ logoImage }) => {
 
   if (pageLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      </View>
+      <View
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      ></View>
     );
-  } else return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <View style={styles.loginContainer}>
-        <Image source={logoImage} style={styles.logo} resizeMode="contain" />
+  } else
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <View style={styles.loginContainer}>
+          <Image source={logoImage} style={styles.logo} resizeMode="contain" />
 
-        {/* Campo de Email */}
-        <TextInput
-          style={[styles.input, errors.email ? styles.inputError : null]}
-          placeholder="Email"
-          placeholderTextColor="#999"
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-            setErrors({ ...errors, email: "", credentials: "" });
-          }}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        {errors.email ? (
-          <Text style={styles.errorText}>{errors.email}</Text>
-        ) : null}
+          {/* Campo de Email */}
+          <TextInput
+            style={[styles.input, errors.email ? styles.inputError : null]}
+            placeholder="Email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              setErrors({ ...errors, email: "", credentials: "" });
+            }}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          ) : null}
 
-        {/* Campo de Contraseña */}
-        <TextInput
-          style={[styles.input, errors.password ? styles.inputError : null]}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={(text) => {
-            setPassword(text);
-            setErrors({ ...errors, password: "", credentials: "" });
-          }}
-          secureTextEntry
-        />
-        {errors.password ? (
-          <Text style={styles.errorText}>{errors.password}</Text>
-        ) : null}
+          {/* Campo de Contraseña */}
+          <TextInput
+            style={[styles.input, errors.password ? styles.inputError : null]}
+            placeholder="Password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              setErrors({ ...errors, password: "", credentials: "" });
+            }}
+            secureTextEntry
+          />
+          {errors.password ? (
+            <Text style={styles.errorText}>{errors.password}</Text>
+          ) : null}
 
-        {/* Mensaje de error de credenciales */}
-        {errors.credentials ? (
-          <Text style={[styles.errorText, styles.credentialsError]}>
-            {errors.credentials}
-          </Text>
-        ) : null}
+          {/* Mensaje de error de credenciales */}
+          {errors.credentials ? (
+            <Text style={[styles.errorText, styles.credentialsError]}>
+              {errors.credentials}
+            </Text>
+          ) : null}
 
-        {/* Botón de Login */}
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text style={styles.loginButtonText}>
-            {isLoading ? "CARGANDO..." : "LOGIN"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
-  );
+          {/* Botón de Login */}
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <Text style={styles.loginButtonText}>
+              {isLoading ? "CARGANDO..." : "LOGIN"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    );
 };
 
 const styles = StyleSheet.create({

@@ -35,20 +35,31 @@ export default function ExitRegistrationScreen() {
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [guard, setGuard] = useState<User | null>(null);
-  const [authToken, setAuthTokenState] = useState<string | null>(null);
+  const [visits, setVisits] = useState<VisitResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    const SetUpCamera = async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === "granted");
-    })();
-  }, []);
+    };
 
-  useEffect(() => {
+    //Obtener visitas
+    const getVisits = async () => {
+      try {
+        if (!qrData) throw new Error("El QR escaneado es invalido");
+
+        setVisits(await getVisitsByQRId(qrData as string));
+        setIsLoading(false);
+      } catch (error) {
+        console.error(`Ocurrio un error al obtener visitas`, error);
+      }
+    };
+
+    //validacion del usuario
     const initializeAuth = async () => {
       try {
         const token = await loadToken();
-        setAuthTokenState(token);
         setAuthToken(token);
 
         if (token) {
@@ -61,36 +72,25 @@ export default function ExitRegistrationScreen() {
     };
 
     initializeAuth();
+    getVisits();
+    SetUpCamera();
   }, []);
 
   // Simula la carga desde una API
-  const [visits, setVisits] = useState<VisitResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const getVisits = async () => {
-      try {
-        setVisits(await getVisitsByQRId(qrData!));
-        setIsLoading(false);
-      } catch (error) {
-        console.error(`Ocurrio un error al obtener visitas`, error);
-      }
-    };
-    getVisits();
-  }, []);
+  //Obtiene los datos de las visitas
 
-   const finalizarVisita = async () => {
+  const finalizarVisita = async () => {
     const payload: RegistryData = {
       qrId: visits!.qrId,
       guardId: guard!._id,
     };
     try {
-      await RegisterEntry(payload, "finalizada");
       Alert.alert("Éxito", "La visita fue finalizada");
     } catch (error) {
       Alert.alert("Error", "No se pudo finalizar la visita");
     }
-  }; 
+  };
 
   const handleBarCodeScanned = async ({ data }: BarCodeScannerResult) => {
     if (!scanned) {
@@ -99,16 +99,16 @@ export default function ExitRegistrationScreen() {
 
       try {
         const visit = await getVisitsByQRId(data); // valida contra la API
-        if(visit.authorization.state != "finalizada"){
+        if (visit.authorization.state != "finalizada") {
           if (visit.qrId === data) {
-          finalizarVisita();
-          Alert.alert("Éxito", "QR válido, Visita finalizada", [
-            {
-              text: "OK",
-            },
-          ]);
+            finalizarVisita();
+            Alert.alert("Éxito", "QR válido, Visita finalizada", [
+              {
+                text: "OK",
+              },
+            ]);
+          }
         }
-        } 
       } catch (error) {
         console.error("QR inválido o no encontrado:", error);
         Alert.alert("Error", "El QR no está registrado.", [

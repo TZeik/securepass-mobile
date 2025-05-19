@@ -11,7 +11,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../types/types";
 import { User } from "../../types/user.types";
 import { getResidents } from "@/api/user.api";
-import { setAuthToken } from "@/services/auth.service";
+import { delToken, loadToken, setAuthToken } from "@/services/auth.service";
 import { getAuthenticatedUser } from "@/api/auth.api";
 
 type PersonDetailScreenProps = NativeStackScreenProps<
@@ -20,7 +20,7 @@ type PersonDetailScreenProps = NativeStackScreenProps<
 >;
 
 const ResidentList: React.FC<PersonDetailScreenProps> = ({ route, navigation }) => {
-  const { token } = route.params;
+  
   const [user, setUser] = useState(route.params.user);
   const [residents, setResidents] = useState<User[] | null>(null);
   const [isLoading, setLoading] = useState(true);
@@ -29,12 +29,13 @@ const ResidentList: React.FC<PersonDetailScreenProps> = ({ route, navigation }) 
     const verifySession = async () => {
           try {
             setLoading(true);
-            setAuthToken(token);
+            setAuthToken(await loadToken());
             setUser(await getAuthenticatedUser());
           } catch (error: any) {
             console.error("Se produjo un error al verificar sesión", error);
             Alert.alert("Error", error.message);
             navigation.replace("Login");
+            delToken();
         };
       }
 

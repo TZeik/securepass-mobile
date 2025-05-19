@@ -17,15 +17,16 @@ import { RootStackParamList } from "../../types/types";
 import Navigation from "@/navigation/Navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
-import { VisitResponse } from "@/types/visit.types";
-import { getVisitsByQRId } from "@/api/visit.api";
+import { RegistryData, VisitResponse } from "@/types/visit.types";
+import { getVisitsByQRId, RegisterExit } from "@/api/visit.api";
+import { getAuthenticatedUser } from "@/api/auth.api";
 
 type ScannerRouteProp = RouteProp<RootStackParamList, "Scanner">;
 type Nav = NavigationProp<RootStackParamList>;
 export default function QRScannerScreen() {
   const route = useRoute<ScannerRouteProp>();
   const navigation = useNavigation<Nav>();
-  const { onScanned, token } = route.params;
+  const { state } = route.params;
 
   const [cameraType, setCameraType] = useState<CameraType>("back");
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -51,32 +52,43 @@ export default function QRScannerScreen() {
         if (visit.qrId === data) {
           //Verificar que uno que ya este aprobado/desaprobado no salga para aprobar o desaprobar nuevamente.
           if (
-            visit.authorization.state === "aprobada" ||
-            visit.authorization.state === "desaprobada" ||
+            (state === "entry" && visit.authorization.state === "aprobada") ||
+            (state === "exit" && visit.authorization.state === "pendiente") ||
+            visit.authorization.state === "rechazada" ||
             visit.authorization.state === "finalizada"
           ) {
-            Alert.alert("Éxito", "Visita ya validada", [
+            navigation.navigate("Main");
+            Alert.alert("Error", "Estado de visita invalido", [
               {
                 text: "OK",
-                onPress: () =>
-                  navigation.reset({
-                    index: 0,
-                    routes: [{ name: "Main" }],
-                  }), // pasa los datos si quieres
               },
             ]);
-          } else{
-          Alert.alert("Éxito", "QR válido", [
-            {
-              text: "OK",
-              onPress: () => navigation.navigate("EntryForm", { qrData: data }), // pasa los datos si quieres
-            },
-          ]);
+          } else {
+            if (state === "entry") {
+              navigation.navigate("EntryForm", { qrData: data });
+            }
+
+            if (state === "exit") {
+              const user = await getAuthenticatedUser();
+              const qrRegistryData: RegistryData = {
+                qrId: data,
+                guardId: user._id,
+              };
+              await RegisterExit(qrRegistryData);
+
+              navigation.navigate("Main");
+
+              Alert.alert("Éxito", "Salida registrada", [
+                {
+                  text: "OK",
+                },
+              ]);
+            }
           }
         }
       } catch (error) {
-        console.error("QR inválido o no encontrado:", error);
-        Alert.alert("Error", "El QR no está registrado.", [
+        //console.error("QR inválido o no encontrado:", error);
+        /* Alert.alert("Error", "El QR no está registrado.", [
           {
             text: "OK",
             onPress: () => {
@@ -84,18 +96,18 @@ export default function QRScannerScreen() {
             },
           },
         ]);
+      } */
       }
     }
+
+    if (hasPermission === null) {
+      return <Text>Solicitando permiso de cámara...</Text>;
+    }
+
+    if (hasPermission === false) {
+      return <Text>Sin acceso a la cámara</Text>;
+    }
   };
-
-  if (hasPermission === null) {
-    return <Text>Solicitando permiso de cámara...</Text>;
-  }
-
-  if (hasPermission === false) {
-    return <Text>Sin acceso a la cámara</Text>;
-  }
-
   return (
     <View style={styles.container}>
       <CameraView

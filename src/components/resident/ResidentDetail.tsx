@@ -110,9 +110,9 @@ const ResidentDetail: React.FC<ResidentDetailScreenProps> = ({ route }) => {
             <Text style={styles.headerText}>Autorización</Text>
           </View>
           
-          {visits?.map((v) => (
+          {visits?.map((v, i) => (
             <TouchableOpacity 
-              key={v._id}
+              key={i}
               style={styles.visitRow}
             >
               <Text style={styles.columnText}>{v.visit.name}</Text>

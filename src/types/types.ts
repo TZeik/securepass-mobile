@@ -3,25 +3,19 @@ import { User } from "./user.types";
 export type RootStackParamList = {
   Login: undefined;
 
-  Main: {
-    token: string;
-    user: User;
-  };
+  Main: undefined;
 
   Scanner: {
-    onScanned?: (value: string) => void;
-    token: string;
+    state: "entry" | "exit";
   };
 
   ResidentDetail: {
     resident: User;
   };
 
-  EntryForm: { qrData: string};
-
+  EntryForm: { qrData: string };
 
   ResidentList: {
-    token: string;
     user: User;
   };
 

@@ -98,10 +98,22 @@ export const getVisitsByQRId = async (id: string): Promise<VisitResponse> => {
 
 export const RegisterEntry = async (
   data: RegistryData,
-  status: 'aprobada' | 'rechazada' | 'finalizada'
+  status: 'aprobada' | 'rechazada'
 ) => {
   try {
     const response = await axios.put(`${API_URL}/visits/entry/?status=${status}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar estado de visita:', error);
+    throw error;
+  }
+};
+
+export const RegisterExit = async (
+  data: RegistryData,
+) => {
+  try {
+    const response = await axios.put(`${API_URL}/visits/exit`, data);
     return response.data;
   } catch (error) {
     console.error('Error al actualizar estado de visita:', error);
