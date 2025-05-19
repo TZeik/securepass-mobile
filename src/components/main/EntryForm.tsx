@@ -73,7 +73,7 @@ const EntryForm:  React.FC<EntryFormProps> = ({ navigation, route }) =>  {
     }
   };
 
-//Logica para Aprobar, Rechazar y finalizar visitas
+//Logica para Aprobar y Rechazar visitas
 const aprobarVisita = async () => {
   const payload: RegistryData = {
     qrId: visits!.qrId,
@@ -85,19 +85,6 @@ const aprobarVisita = async () => {
     Alert.alert('Éxito', 'La visita fue aprobada');
   } catch (error) {
     Alert.alert('Error', 'No se pudo aprobar la visita');
-  }
-};
-
-const finalizarVisita = async () => {
-  const payload: RegistryData = {
-    qrId: visits!.qrId,
-    guardId: guard!._id
-  } ;
-  try {
-    await RegisterEntry(payload, 'finalizada');
-    Alert.alert('Éxito', 'La visita fue finalizada');
-  } catch (error) {
-    Alert.alert('Error', 'No se pudo finalizar la visita');
   }
 };
 

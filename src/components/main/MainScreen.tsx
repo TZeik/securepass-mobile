@@ -51,7 +51,12 @@ const [showLogoutModal, setShowLogoutModal] = useState(false);
   };
 
   const handleRegistrarSalida = () => {
-    navigation.navigate("ExitRegistration", { token });
+    navigation.navigate("ExitRegistration", {
+      onScanned: (value: string) => {
+        console.log("Escaneado:", value);
+      },
+      token
+    });
   };
 
   const handleLogoutRequest = () => {

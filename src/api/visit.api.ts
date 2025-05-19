@@ -1,7 +1,7 @@
 import axios from "axios";
 import { RegistryData, VisitData, VisitResponse } from "../types/visit.types";
 
-const API_URL = "http://api.asolutions.digital/api";
+const API_URL = "https://api.asolutions.digital/api";
 
 export const getVisitsByResidentId = async (
   id: string
@@ -98,7 +98,7 @@ export const getVisitsByQRId = async (id: string): Promise<VisitResponse> => {
 
 export const RegisterEntry = async (
   data: RegistryData,
-  status: 'aprobada' | 'rechazada' | 'finalizada',
+  status: 'aprobada' | 'rechazada' | 'finalizada'
 ) => {
   try {
     const response = await axios.put(`${API_URL}/visits/entry/?status=${status}`, data);

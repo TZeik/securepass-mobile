@@ -2,7 +2,7 @@ import axios from "axios";
 import { LoginData, LoginResponse } from "../types/auth.types";
 import { User } from "../types/user.types";
 
-const API_URL = "http://api.asolutions.digital/api";
+const API_URL = "https://api.asolutions.digital/api";
 
 // Método puedes autenticarte en el backend y recibir un token + información del usuario
 export const loginUser = async (data: LoginData): Promise<LoginResponse> => {

@@ -70,7 +70,7 @@ export default function ExitRegistrationScreen() {
   useEffect(() => {
     const getVisits = async () => {
       try {
-        setVisits(await getVisitsByQRId(qrData));
+        setVisits(await getVisitsByQRId(qrData!));
         setIsLoading(false);
       } catch (error) {
         console.error(`Ocurrio un error al obtener visitas`, error);
@@ -79,7 +79,7 @@ export default function ExitRegistrationScreen() {
     getVisits();
   }, []);
 
-  const finalizarVisita = async () => {
+   const finalizarVisita = async () => {
     const payload: RegistryData = {
       qrId: visits!.qrId,
       guardId: guard!._id,
@@ -90,7 +90,7 @@ export default function ExitRegistrationScreen() {
     } catch (error) {
       Alert.alert("Error", "No se pudo finalizar la visita");
     }
-  };
+  }; 
 
   const handleBarCodeScanned = async ({ data }: BarCodeScannerResult) => {
     if (!scanned) {
@@ -99,8 +99,8 @@ export default function ExitRegistrationScreen() {
 
       try {
         const visit = await getVisitsByQRId(data); // valida contra la API
-
-        if (visit.qrId === data) {
+        if(visit.authorization.state != "finalizada"){
+          if (visit.qrId === data) {
           finalizarVisita();
           Alert.alert("Éxito", "QR válido, Visita finalizada", [
             {
@@ -108,6 +108,7 @@ export default function ExitRegistrationScreen() {
             },
           ]);
         }
+        } 
       } catch (error) {
         console.error("QR inválido o no encontrado:", error);
         Alert.alert("Error", "El QR no está registrado.", [
