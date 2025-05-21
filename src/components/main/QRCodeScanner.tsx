@@ -64,6 +64,7 @@ export default function QRScannerScreen() {
           } else {
             if (state === "entry") {
               navigation.navigate("EntryForm", { qrData: data });
+              setScanned(false);
             }
 
             if (state === "exit") {

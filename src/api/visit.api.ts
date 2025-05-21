@@ -1,6 +1,7 @@
 import axios from "axios";
 import { RegistryData, VisitResponse } from "../types/visit.types";
 import Constants from "expo-constants"
+import { loadToken } from "@/services/auth.service";
 
 const { apiUrl } = Constants.expoConfig?.extra as {apiUrl: string};
 const API_URL = apiUrl;
@@ -120,5 +121,42 @@ export const RegisterExit = async (
   } catch (error) {
     console.error('Error al actualizar estado de visita:', error);
     throw error;
+  }
+};
+
+export const uploadImage = async (
+  uri: string,
+  endpoint: 'upload-visit' | 'upload-vehicle',
+  document?: string
+): Promise<string> => {
+  try {
+    
+    const formData = new FormData();
+    const fileType = uri.split('.').pop() || 'jpg';
+    formData.append('file', {
+      uri,
+      name: `image_${Date.now()}.${fileType}`,
+      type: `image/${fileType}`,
+    } as any);
+
+    
+    const response = await axios.post(
+      `${API_URL}/visits/${endpoint}/${document}`,
+      formData
+    );
+
+   
+    if (response.status !== 200 || !response.data?.data) {
+      throw new Error(response.data?.message || 'Respuesta inválida del servidor');
+    }
+
+    return response.data.message || 'Imagen subida con éxito';
+
+  } catch (error) {
+    console.error('Error en uploadImage:', error);
+    throw new Error(
+     
+      'Error al subir la imagen'
+    );
   }
 };
