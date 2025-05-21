@@ -1,8 +1,8 @@
 import axios from "axios";
 import { RegistryData, VisitResponse } from "../types/visit.types";
-import Constants from "expo-constants"
+import Constants from "expo-constants";
 
-const { apiUrl } = Constants.expoConfig?.extra as {apiUrl: string};
+const { apiUrl } = Constants.expoConfig?.extra as { apiUrl: string };
 const API_URL = apiUrl;
 
 export const getVisitsByResidentId = async (
@@ -100,25 +100,55 @@ export const getVisitsByQRId = async (id: string): Promise<VisitResponse> => {
 
 export const RegisterEntry = async (
   data: RegistryData,
-  status: 'aprobada' | 'rechazada'
+  status: "aprobada" | "rechazada"
 ) => {
   try {
-    const response = await axios.put(`${API_URL}/visits/entry/?status=${status}`, data);
+    const response = await axios.put(
+      `${API_URL}/visits/entry/?status=${status}`,
+      data
+    );
     return response.data;
   } catch (error) {
-    console.error('Error al actualizar estado de visita:', error);
+    console.error("Error al actualizar estado de visita:", error);
     throw error;
   }
 };
 
-export const RegisterExit = async (
-  data: RegistryData,
-) => {
+export const RegisterExit = async (data: RegistryData) => {
   try {
     const response = await axios.put(`${API_URL}/visits/exit`, data);
     return response.data;
   } catch (error) {
-    console.error('Error al actualizar estado de visita:', error);
+    console.error("Error al actualizar estado de visita:", error);
     throw error;
+  }
+};
+
+export const uploadImage = async (
+  endpoint: "upload-visit" | "upload-vehicle",
+  document: string,
+  formData: FormData
+) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/visits/${endpoint}/${document}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (response.status !== 200 || !response.data?.data) {
+      throw new Error(
+        response.data?.message || "Respuesta inválida del servidor"
+      );
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error en uploadImage:", error);
+    throw new Error("Error al subir la imagen");
   }
 };
