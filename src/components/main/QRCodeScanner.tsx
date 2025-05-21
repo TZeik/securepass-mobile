@@ -67,15 +67,13 @@ export default function QRScannerScreen() {
             }
 
             if (state === "exit") {
+              navigation.navigate("Main");
               const user = await getAuthenticatedUser();
               const qrRegistryData: RegistryData = {
                 qrId: data,
                 guardId: user._id,
               };
               await RegisterExit(qrRegistryData);
-
-              navigation.navigate("Main");
-
               Alert.alert("Éxito", "Salida registrada", [
                 {
                   text: "OK",
