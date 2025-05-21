@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Image,
   Button,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { RegistryData, VisitResponse } from "@/types/visit.types";
@@ -19,12 +19,6 @@ import { RootStackParamList } from "@/types/types";
 import { loadToken, setAuthToken } from "@/services/auth.service";
 import { getAuthenticatedUser } from "@/api/auth.api";
 import { User } from "@/types/user.types";
-import {
-  Camera,
-  CameraView,
-  CameraViewRef,
-  useCameraPermissions,
-} from "expo-camera";
 
 type EntryFormProps = NativeStackScreenProps<RootStackParamList, "EntryForm">;
 
@@ -34,15 +28,10 @@ const EntryForm: React.FC<EntryFormProps> = ({ navigation, route }) => {
   const { qrData } = route.params;
   const [guard, setGuard] = useState<User | null>(null);
   const [authToken, setAuthTokenState] = useState<string | null>(null);
-  const [hasCameraPermission, setHasCameraPermission] = useState<
-    boolean | null
-  >(null);
-  const cameraRef = useRef<CameraViewRef | null>(null);
-  const [photoUri, setPhotoUri] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [visits, setVisits] = useState<VisitResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [showCamera, setShowCamera] = useState<"person" | "vehicle" | null>(
-    null
-  );
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -60,16 +49,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ navigation, route }) => {
     };
 
     initializeAuth();
-
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(status === "granted");
-    })();
   }, []);
-
-  // Simula la carga desde una API
-  const [visits, setVisits] = useState<VisitResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getVisits = async () => {
@@ -78,16 +58,15 @@ const EntryForm: React.FC<EntryFormProps> = ({ navigation, route }) => {
         setIsLoading(false);
       } catch (error) {
         console.error(`Ocurrio un error al obtener visitas`, error);
+        setIsLoading(false);
       }
     };
     getVisits();
-  }, []);
+  }, [qrData]);
 
-  //Manejo de fotos de la galeria
-
-  //Manejo de fotos desde la camara
   const tomarFoto = async (tipo: "upload-visit" | "upload-vehicle") => {
-    if (hasCameraPermission === false) {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
       Alert.alert(
         "Permiso denegado",
         "Se necesita acceso a la cámara para tomar fotos"
@@ -103,40 +82,73 @@ const EntryForm: React.FC<EntryFormProps> = ({ navigation, route }) => {
 
     if (!resultado.canceled) {
       const uri = resultado.assets[0].uri;
-      try {
-        if (tipo === "upload-visit") {
-          setImagenPersona(uri);
-        } else if (tipo === "upload-vehicle") {
-          setImagenVehiculo(uri);
-        }
-      } catch (error) {
-        console.log("Error al subir imagen");
+      if (tipo === "upload-visit") {
+        setImagenPersona(uri);
+      } else {
+        setImagenVehiculo(uri);
       }
     }
   };
 
-  //Logica para Aprobar Visitas
-  const aprobarVisita = async () => {
-    const payload: RegistryData = {
-      qrId: visits!.qrId,
-      guardId: guard!._id,
-    };
+  const createFormData = (uri: string) => {
+    const formData = new FormData();
+    const filename = uri.split('/').pop();
+    const match = /\.(\w+)$/.exec(filename || '');
+    const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+    formData.append('image', {
+      uri,
+      name: filename,
+      type,
+    } as any);
+
+    return formData;
+  };
+
+  const handleImageUpload = async (
+    imageUri: string | null,
+    endpoint: "upload-visit" | "upload-vehicle",
+    document: string
+  ) => {
+    if (!imageUri) return;
 
     try {
+      setIsUploading(true);
+      const formData = createFormData(imageUri);
+      await uploadImage(endpoint, document, formData);
+    } catch (error) {
+      console.error("Error al subir imagen:", error);
+      throw error;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const aprobarVisita = async () => {
+    if (!visits || !guard) return;
+
+    try {
+      setIsUploading(true);
+
+      const payload: RegistryData = {
+        qrId: visits.qrId,
+        guardId: guard._id,
+      };
       await RegisterEntry(payload, "aprobada");
-      if (imagenPersona && imagenPersona.trim() !== "") {
-        await uploadImage(
-          imagenPersona!,
+
+      if (imagenPersona) {
+        await handleImageUpload(
+          imagenPersona,
           "upload-visit",
-          visits?.visit.document
+          visits.visit.document
         );
       }
 
-      if (imagenVehiculo && imagenVehiculo.trim() !== "") {
-        await uploadImage(
-          imagenVehiculo!,
+      if (imagenVehiculo) {
+        await handleImageUpload(
+          imagenVehiculo,
           "upload-vehicle",
-          visits?.visit.document
+          visits.visit.document
         );
       }
 
@@ -144,26 +156,44 @@ const EntryForm: React.FC<EntryFormProps> = ({ navigation, route }) => {
       navigation.navigate("Main");
     } catch (error) {
       Alert.alert("Error", "No se pudo aprobar la visita");
-      console.log(visits?.visit.document)
+      console.error("Error en aprobarVisita:", error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  //Logica para Rechazar Visitas
-
   const rechazarVisita = async () => {
-    const payload: RegistryData = {
-      qrId: visits!.qrId,
-      guardId: guard!._id,
-    };
+    if (!visits || !guard) return;
 
     try {
+      const payload: RegistryData = {
+        qrId: visits.qrId,
+        guardId: guard._id,
+      };
       await RegisterEntry(payload, "rechazada");
       Alert.alert("Éxito", "Entrada rechazada");
       navigation.navigate("Main");
     } catch (error) {
       Alert.alert("Error", "No se pudo rechazar la visita");
+      console.error("Error en rechazarVisita:", error);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (!visits) {
+    return (
+      <View style={styles.container}>
+        <Text>No se encontró la visita</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -171,40 +201,52 @@ const EntryForm: React.FC<EntryFormProps> = ({ navigation, route }) => {
         <Text style={styles.title}>Información de la Visita</Text>
 
         <Text style={styles.label}>Nombre:</Text>
-        <Text style={styles.value}>{visits?.visit.name}</Text>
+        <Text style={styles.value}>{visits.visit.name}</Text>
 
         <Text style={styles.label}>Correo:</Text>
-        <Text style={styles.value}>{visits?.visit.email}</Text>
+        <Text style={styles.value}>{visits.visit.email}</Text>
 
         <Text style={styles.label}>Cédula:</Text>
-        <Text style={styles.value}>{visits?.visit.document}</Text>
+        <Text style={styles.value}>{visits.visit.document}</Text>
 
-        <Text style={styles.label}>Imagen de la cedula:</Text>
+        <Text style={styles.label}>Imagen de la cédula:</Text>
         {imagenPersona && (
           <Image source={{ uri: imagenPersona }} style={styles.image} />
         )}
-        <Button title="Tomar foto" onPress={() => tomarFoto("upload-visit")} />
+        <Button 
+          title="Tomar foto" 
+          onPress={() => tomarFoto("upload-visit")} 
+          disabled={isUploading}
+        />
 
         <Text style={styles.label}>Imagen del vehículo:</Text>
         {imagenVehiculo && (
           <Image source={{ uri: imagenVehiculo }} style={styles.image} />
         )}
-
-        <Button
-          title="Tomar foto"
-          onPress={() => tomarFoto("upload-vehicle")}
+        <Button 
+          title="Tomar foto" 
+          onPress={() => tomarFoto("upload-vehicle")} 
+          disabled={isUploading}
         />
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.btnGreen}>
-            <Text style={styles.btnText} onPress={aprobarVisita}>
-              Aprobar
-            </Text>
+          <TouchableOpacity 
+            style={styles.btnGreen}
+            onPress={aprobarVisita}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.btnText}>Aprobar</Text>
+            )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnRed}>
-            <Text style={styles.btnText} onPress={rechazarVisita}>
-              Rechazar
-            </Text>
+          <TouchableOpacity 
+            style={styles.btnRed}
+            onPress={rechazarVisita}
+            disabled={isUploading}
+          >
+            <Text style={styles.btnText}>Rechazar</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -217,6 +259,11 @@ const styles = StyleSheet.create({
     padding: 30,
     backgroundColor: "#f2f6fc",
     flexGrow: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   card: {
     backgroundColor: "#ffffff",
