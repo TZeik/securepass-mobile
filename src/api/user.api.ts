@@ -1,8 +1,9 @@
 import axios from "axios";
-import { LoginData, LoginResponse } from "../types/auth.types";
 import { User } from "../types/user.types";
+import Constants from "expo-constants"
 
-const API_URL = "https://api.asolutions.digital/api";
+const { apiUrl } = Constants.expoConfig?.extra as {apiUrl: string};
+const API_URL = apiUrl;
 
 export const getResidents = async () : Promise<User[]> => {
     try {

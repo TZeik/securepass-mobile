@@ -31,7 +31,6 @@ export default function QRScannerScreen() {
   const [cameraType, setCameraType] = useState<CameraType>("back");
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
-  const [scannedData, setScannedData] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -43,7 +42,6 @@ export default function QRScannerScreen() {
   const handleBarCodeScanned = async ({ data }: BarCodeScannerResult) => {
     if (!scanned) {
       setScanned(true);
-      setScannedData(data);
 
       try {
         const visit = await getVisitsByQRId(data); // valida contra la API
@@ -87,16 +85,8 @@ export default function QRScannerScreen() {
           }
         }
       } catch (error) {
-        //console.error("QR inválido o no encontrado:", error);
-        /* Alert.alert("Error", "El QR no está registrado.", [
-          {
-            text: "OK",
-            onPress: () => {
-              setScanned(false); // permite escanear de nuevo
-            },
-          },
-        ]);
-      } */
+        console.error("Ocurrió un error al tratar de escanear el código", error);
+        navigation.navigate("Main");
       }
     }
 
@@ -118,17 +108,6 @@ export default function QRScannerScreen() {
         }}
         style={StyleSheet.absoluteFillObject}
       />
-      <View style={styles.overlay}>
-        {scannedData && (
-          <Button
-            title="Escanear otro"
-            onPress={() => {
-              setScanned(false);
-              setScannedData(null);
-            }}
-          />
-        )}
-      </View>
     </View>
   );
 }
